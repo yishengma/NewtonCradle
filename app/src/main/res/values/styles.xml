@@ -1,0 +1,24 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <declare-styleable name="NewtonCradle">
+        <!--球的颜色-->
+        <attr name="ball_color" format="color"/>
+        <!--支架的颜色-->
+        <attr name="cradle_color" format="color"/>
+        <!--球的数量，最少 3 个-->
+        <attr name="ball_count" format="integer"/>
+        <!--底座的颜色-->
+        <attr name="base_color" format="color"/>
+
+        <attr name="line_color" format="color"/>
+    </declare-styleable>
+
+</resources>
