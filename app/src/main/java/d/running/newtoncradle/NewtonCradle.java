@@ -1,5 +1,6 @@
 package d.running.newtoncradle;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -71,7 +72,6 @@ public class NewtonCradle extends View {
     private boolean isCw;
     private double mSweepAngle;
     private double mMaxAngle;
-
 
 
     private int mCurrentBall;
@@ -201,10 +201,21 @@ public class NewtonCradle extends View {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Log.e(TAG, "onMeasure: ");
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        Log.e(TAG, "onLayout: ");
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawColor(Color.BLACK);
-
 
         drawBalls(canvas);
 
@@ -255,7 +266,7 @@ public class NewtonCradle extends View {
                 //当前移动的既不是左边的，也不是右边的
                 if (i != 0 && i != mBallCount - 1) {
                     //需要抖动一下
-                    int delta = isCw ? 2 : -2;
+                    int delta = isCw ? -2 : 2;
                     canvas.drawCircle(mCircles[i][0] + delta, mCircles[i][1], mRadius, mBallPaint);
                     //是左边的，所以
                 } else if (i == 0) {
@@ -266,7 +277,7 @@ public class NewtonCradle extends View {
                     //是右边的，所以
                 } else if (i == mBallCount - 1) {
                     float cx = (float) (mCircles[i][0] + Math.sin(Math.toRadians(mSweepAngle)) * mLineLength);
-                    float cy = (float) (mCircles[i][1] + (mLineLength - Math.cos(Math.toRadians(mSweepAngle)) * mLineLength));
+                    float cy = (float) (mCircles[i][1] - (mLineLength - Math.cos(Math.toRadians(mSweepAngle)) * mLineLength));
                     canvas.drawCircle(cx, cy, mRadius, mBallPaint);
                 }
                 //如果不是正在移动的球
@@ -316,9 +327,12 @@ public class NewtonCradle extends View {
         //绘制半个圆角矩形
         mCradleMeasure.getSegment(bottom - ry, (right - rx + bottom - ry + length) * 2 + bottom - ry, mDst, true);
 
+
         canvas.drawPath(mDst, mCradlePaint);
 
-
+        mDst.reset();
+        mOvalPath.reset();
+        mCradlePath.reset();
     }
 
     private void drawBase(Canvas canvas) {
@@ -351,72 +365,77 @@ public class NewtonCradle extends View {
 
         for (int i = 0; i < mBallCount; i++) {
             //如是移动中的线
+            mLinePath.reset();
             if (i == mCurrentBall) {
                 if (i != 0 && i != mBallCount - 1) {
                     int delta = isCw ? 2 : -2;
+
                     mLinePath.moveTo(mCircles[i][0] + delta, mCircles[i][1]);
                     mLinePath.lineTo(mLines[i][0], mLines[i][1]);
-                    canvas.drawPath(mLinePath,mLinePaint);
+                    canvas.drawPath(mLinePath, mLinePaint);
                 } else if (i == 0) {
 
                     float cx = (float) (mCircles[i][0] - Math.sin(Math.toRadians(mSweepAngle)) * mLineLength);
                     float cy = (float) (mCircles[i][1] - (mLineLength - Math.cos(Math.toRadians(mSweepAngle)) * mLineLength));
 
-                    mLinePath.moveTo(cx,cy);
-                    mLinePath.lineTo(mLines[i][0],mLines[i][1]);
-                    canvas.drawPath(mLinePath,mLinePaint);
+                    mLinePath.moveTo(cx, cy);
+                    mLinePath.lineTo(mLines[i][0], mLines[i][1]);
+                    canvas.drawPath(mLinePath, mLinePaint);
                 } else if (i == mBallCount - 1) {
 
                     float cx = (float) (mCircles[i][0] + Math.sin(Math.toRadians(mSweepAngle)) * mLineLength);
-                    float cy = (float) (mCircles[i][1] + (mLineLength - Math.cos(Math.toRadians(mSweepAngle)) * mLineLength));
-                    mLinePath.moveTo(cx,cy);
-                    mLinePath.lineTo(mLines[i][0],mLines[i][1]);
-                    canvas.drawPath(mLinePath,mLinePaint);
+                    float cy = (float) (mCircles[i][1] - (mLineLength - Math.cos(Math.toRadians(mSweepAngle)) * mLineLength));
+                    mLinePath.moveTo(cx, cy);
+                    mLinePath.lineTo(mLines[i][0], mLines[i][1]);
+                    canvas.drawPath(mLinePath, mLinePaint);
                 }
 
                 //如果不是移动中的线
             } else {
                 mLinePath.moveTo(mCircles[i][0], mCircles[i][1]);
-                mLinePath.lineTo(mLines[i][0],mLines[i][1]);
-                canvas.drawPath(mLinePath,mLinePaint);
+                mLinePath.lineTo(mLines[i][0], mLines[i][1]);
+                canvas.drawPath(mLinePath, mLinePaint);
 
             }
         }
 
     }
 
-    private void swingAngle(){
-       if (isCw){
-           if (mCurrentBall == mBallCount -1 && mSweepAngle!=0){
-               mSweepAngle--;
-           }else if (mCurrentBall == mBallCount-1 && mSweepAngle == 0){
-               mCurrentBall--;
-           }else if (mCurrentBall != 0){
-               mCurrentBall--;
-           }else if (/*mCurrentBall == 0 && */mSweepAngle!=mMaxAngle){
-               mSweepAngle++;
-           }else {
-               isCw = false;
-           }
+    private void swingAngle() {
 
-       }
-       else {
-           if (mCurrentBall == 0 &&  mSweepAngle!=mMaxAngle){
-               mSweepAngle--;
-           }else if (mCurrentBall == 0 /*&& mSweepAngle == 0*/){
-               mCurrentBall++;
-           }else if (mCurrentBall != mBallCount-1){
-               mCurrentBall++;
-           }else if (mCurrentBall == mBallCount-1 && mSweepAngle != mMaxAngle){
-               mSweepAngle++;
-           }else {
-               isCw = true;
-           }
-       }
-        Log.e(TAG, "swingAngle: "+mCurrentBall );
-        Log.e(TAG, "swingAngle: "+mSweepAngle);
-       postInvalidateDelayed(10);
+        if (isCw) {
+            if (mCurrentBall == mBallCount - 1 && mSweepAngle != 0) {
+                mSweepAngle--;
+            } else if (mCurrentBall == mBallCount - 1 && mSweepAngle == 0) {
+                mCurrentBall--;
+            } else if (mCurrentBall != 0) {
+                mCurrentBall--;
+            } else if (/*mCurrentBall == 0 && */mSweepAngle != mMaxAngle) {
+                mSweepAngle++;
+            } else {
+                isCw = false;
+            }
+
+        } else {
+            if (mCurrentBall == 0 && mSweepAngle != 0) {
+                mSweepAngle--;
+            } else if (mCurrentBall == 0 /*&& mSweepAngle == 0*/) {
+                mCurrentBall++;
+            } else if (mCurrentBall != mBallCount - 1) {
+                mCurrentBall++;
+            } else if (mCurrentBall == mBallCount - 1 && mSweepAngle != mMaxAngle) {
+                mSweepAngle++;
+            } else {
+                isCw = true;
+            }
+        }
+//        invalidate();
+        postInvalidateDelayed(40);
+
     }
+//越来越慢：path定义为全局变量,然
+// 后每次ondraw都没有reset,就导致了path越来越多,
+// 最后卡死.解决方法就reset
 
 
 }
