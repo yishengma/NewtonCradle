@@ -72,6 +72,7 @@ public class NewtonCradle extends View {
     private boolean isCw;
     private double mSweepAngle;
     private double mMaxAngle;
+    private double mTime;
 
 
     private int mCurrentBall;
@@ -150,7 +151,7 @@ public class NewtonCradle extends View {
 
         mCradlePaint = new Paint();
         mCradlePaint.setColor(mCradleColor);
-        mCradlePaint.setStrokeWidth(2);
+        mCradlePaint.setStrokeWidth(4);
         mCradlePaint.setStyle(Paint.Style.STROKE);
         mCradlePaint.setAntiAlias(true);
 
@@ -183,6 +184,7 @@ public class NewtonCradle extends View {
         mMaxAngle = mSweepAngle;
         mCurrentBall = 0;
         mRadius = 20;
+        mTime = 0;
 
 
     }
@@ -200,17 +202,17 @@ public class NewtonCradle extends View {
 
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        Log.e(TAG, "onMeasure: ");
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        Log.e(TAG, "onLayout: ");
-    }
+//    @Override
+//    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+//        Log.e(TAG, "onMeasure: ");
+//    }
+//
+//    @Override
+//    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+//        super.onLayout(changed, left, top, right, bottom);
+//        Log.e(TAG, "onLayout: ");
+//    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -270,6 +272,7 @@ public class NewtonCradle extends View {
                     canvas.drawCircle(mCircles[i][0] + delta, mCircles[i][1], mRadius, mBallPaint);
                     //是左边的，所以
                 } else if (i == 0) {
+
                     float cx = (float) (mCircles[i][0] - Math.sin(Math.toRadians(mSweepAngle)) * mLineLength);
                     float cy = (float) (mCircles[i][1] - (mLineLength - Math.cos(Math.toRadians(mSweepAngle)) * mLineLength));
 
@@ -404,38 +407,56 @@ public class NewtonCradle extends View {
     private void swingAngle() {
 
         if (isCw) {
-            if (mCurrentBall == mBallCount - 1 && mSweepAngle != 0) {
-                mSweepAngle--;
-            } else if (mCurrentBall == mBallCount - 1 && mSweepAngle == 0) {
+            //这个角度的增加需要按提高的高度进行增加，生成暂停的动画效果
+            if (mCurrentBall == mBallCount - 1 && /*mSweepAngle != 0*/!DoubleCompare(mSweepAngle,0)) {
+                //用 cos 函数 模拟 角度的 变化
+                // y = 20 * |cos(x)|
+                // x 的增量为 Math.PI / 48
+                //当 x == 0 的时候逐渐减小
+                mSweepAngle = 20 * Math.abs(Math.cos(mTime));
+
+                mTime = mTime + Math.PI / 48;
+            } else if (mCurrentBall == mBallCount - 1 && /*mSweepAngle == 0*/DoubleCompare(mSweepAngle,0)) {
                 mCurrentBall--;
             } else if (mCurrentBall != 0) {
                 mCurrentBall--;
-            } else if (/*mCurrentBall == 0 && */mSweepAngle != mMaxAngle) {
-                mSweepAngle++;
+            } else if (/*mCurrentBall == 0 && *//*mSweepAngle != mMaxAngle*/!DoubleCompare(mSweepAngle,mMaxAngle)) {
+                mSweepAngle = 20 * Math.abs(Math.cos(mTime));
+                mTime = mTime + Math.PI / 48;
             } else {
                 isCw = false;
             }
 
         } else {
-            if (mCurrentBall == 0 && mSweepAngle != 0) {
-                mSweepAngle--;
+            if (mCurrentBall == 0 && /*mSweepAngle != 0*/!DoubleCompare(mSweepAngle,0)) {
+                mSweepAngle = 20 * Math.abs(Math.cos(mTime));
+                mTime = mTime + Math.PI / 48;
             } else if (mCurrentBall == 0 /*&& mSweepAngle == 0*/) {
                 mCurrentBall++;
             } else if (mCurrentBall != mBallCount - 1) {
                 mCurrentBall++;
-            } else if (mCurrentBall == mBallCount - 1 && mSweepAngle != mMaxAngle) {
-                mSweepAngle++;
+            } else if (mCurrentBall == mBallCount - 1 && /*mSweepAngle != mMaxAngle*/!DoubleCompare(mSweepAngle,mMaxAngle)) {
+
+
+                mSweepAngle = 20 * Math.abs(Math.cos(mTime));
+                mTime = mTime + Math.PI / 48 ;
             } else {
                 isCw = true;
             }
         }
-//        invalidate();
-        postInvalidateDelayed(40);
+
+       postInvalidateDelayed(48);
+        //0  -  20
 
     }
+
 //越来越慢：path定义为全局变量,然
 // 后每次ondraw都没有reset,就导致了path越来越多,
 // 最后卡死.解决方法就reset
+
+    private boolean DoubleCompare(double d1,double d2){
+        return Math.abs(d1 - d2) < 1.0 * 10E-6;
+    }
 
 
 }
