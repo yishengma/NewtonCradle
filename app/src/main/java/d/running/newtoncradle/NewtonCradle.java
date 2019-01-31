@@ -1,7 +1,8 @@
 package d.running.newtoncradle;
 
-import android.annotation.SuppressLint;
+
 import android.content.Context;
+
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,8 +14,10 @@ import android.graphics.RectF;
 
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
+
+
 import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * Created by PirateHat on 2019/1/29.
@@ -22,14 +25,18 @@ import android.view.View;
 
 public class NewtonCradle extends View {
 
+    private static final int DEFAULT_HEIGHT = 250;
+    private static final int DEFAULT_WIDTH = 350;
 
-    private static int MAX_BALL_COUNT; // 最大的球的数量
-    private static final int MIN_BALL_COUNT = 3;
+    private static final int DEFAULT_RADIUS = 20;
+    private static int MAX_BALL_COUNT = 6; // 最大的球的数量
+    private static final int MIN_BALL_COUNT = 2;
     private static final int DEFAULT_BALL_COUNT = 6;
     private static final int DEFAULT_BALL_COLOR = 0xff_ff_ff_ff;
     private static final int DEFAULT_CRADLE_COLOR = 0xff_ff_ff_ff;
     private static final int DEFAULT_BASE_COLOR = 0xff_ff_ff_ff;
     private static final int DEFAULT_LINE_COLOR = 0xff_ff_ff_ff;
+    private static final int DEFAULT_BACKGROUND = 0xff_2c_3e_50;
 
     private int mBallCount;
     private int mBallColor;
@@ -114,7 +121,15 @@ public class NewtonCradle extends View {
         mLineColor = typedArray.getColor(R.styleable.NewtonCradle_line_color, DEFAULT_LINE_COLOR);
         //球的数量
         mBallCount = typedArray.getColor(R.styleable.NewtonCradle_ball_count, DEFAULT_BALL_COUNT);
+        if (mBallCount < 2) {
+            mBallCount = DEFAULT_BALL_COUNT;
+        }
 
+        mRadius = typedArray.getInt(R.styleable.NewtonCradle_ball_radius, DEFAULT_RADIUS);
+
+        if (mRadius < 1) {
+            mRadius = DEFAULT_RADIUS;
+        }
         typedArray.recycle();
 
     }
@@ -183,7 +198,7 @@ public class NewtonCradle extends View {
         mSweepAngle = 20;
         mMaxAngle = mSweepAngle;
         mCurrentBall = 0;
-        mRadius = 20;
+
         mTime = 0;
 
 
@@ -202,11 +217,31 @@ public class NewtonCradle extends View {
 
     }
 
-//    @Override
-//    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//        Log.e(TAG, "onMeasure: ");
-//    }
+    //widthMeasureSpec 是当前 View 的
+    //heightMeasureSpec 也是当前 View 的
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int ws = MeasureSpec.getSize(widthMeasureSpec);
+        int wm = MeasureSpec.getMode(widthMeasureSpec);
+
+        int hs = MeasureSpec.getSize(heightMeasureSpec);
+        int hm = MeasureSpec.getMode(heightMeasureSpec);
+
+        //这里不用 模式进行比较是因为 当 父容器为 AT_MOST 当前 View 为 Match_parent 时
+        //当前 View 的大小因为 父容器的大小，但是模式 为 AT_MOST
+        //存在逻辑错误
+        if (getLayoutParams().width == ViewGroup.LayoutParams.WRAP_CONTENT
+                && getLayoutParams().height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+            setMeasuredDimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        } else if (getLayoutParams().width == ViewGroup.LayoutParams.WRAP_CONTENT) {
+            setMeasuredDimension(DEFAULT_WIDTH, hs);
+        } else if (getLayoutParams().height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+            setMeasuredDimension(hs, DEFAULT_HEIGHT);
+        }
+
+    }
 //
 //    @Override
 //    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -217,7 +252,9 @@ public class NewtonCradle extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawColor(Color.BLACK);
+        if (getBackground() == null) {
+            canvas.drawColor(DEFAULT_BACKGROUND);
+        }
 
         drawBalls(canvas);
 
@@ -408,7 +445,7 @@ public class NewtonCradle extends View {
 
         if (isCw) {
             //这个角度的增加需要按提高的高度进行增加，生成暂停的动画效果
-            if (mCurrentBall == mBallCount - 1 && /*mSweepAngle != 0*/!DoubleCompare(mSweepAngle,0)) {
+            if (mCurrentBall == mBallCount - 1 && /*mSweepAngle != 0*/!DoubleCompare(mSweepAngle, 0)) {
                 //用 cos 函数 模拟 角度的 变化
                 // y = 20 * |cos(x)|
                 // x 的增量为 Math.PI / 48
@@ -416,11 +453,11 @@ public class NewtonCradle extends View {
                 mSweepAngle = 20 * Math.abs(Math.cos(mTime));
 
                 mTime = mTime + Math.PI / 48;
-            } else if (mCurrentBall == mBallCount - 1 && /*mSweepAngle == 0*/DoubleCompare(mSweepAngle,0)) {
+            } else if (mCurrentBall == mBallCount - 1 && /*mSweepAngle == 0*/DoubleCompare(mSweepAngle, 0)) {
                 mCurrentBall--;
             } else if (mCurrentBall != 0) {
                 mCurrentBall--;
-            } else if (/*mCurrentBall == 0 && *//*mSweepAngle != mMaxAngle*/!DoubleCompare(mSweepAngle,mMaxAngle)) {
+            } else if (/*mCurrentBall == 0 && *//*mSweepAngle != mMaxAngle*/!DoubleCompare(mSweepAngle, mMaxAngle)) {
                 mSweepAngle = 20 * Math.abs(Math.cos(mTime));
                 mTime = mTime + Math.PI / 48;
             } else {
@@ -428,24 +465,24 @@ public class NewtonCradle extends View {
             }
 
         } else {
-            if (mCurrentBall == 0 && /*mSweepAngle != 0*/!DoubleCompare(mSweepAngle,0)) {
+            if (mCurrentBall == 0 && /*mSweepAngle != 0*/!DoubleCompare(mSweepAngle, 0)) {
                 mSweepAngle = 20 * Math.abs(Math.cos(mTime));
                 mTime = mTime + Math.PI / 48;
             } else if (mCurrentBall == 0 /*&& mSweepAngle == 0*/) {
                 mCurrentBall++;
             } else if (mCurrentBall != mBallCount - 1) {
                 mCurrentBall++;
-            } else if (mCurrentBall == mBallCount - 1 && /*mSweepAngle != mMaxAngle*/!DoubleCompare(mSweepAngle,mMaxAngle)) {
+            } else if (mCurrentBall == mBallCount - 1 && /*mSweepAngle != mMaxAngle*/!DoubleCompare(mSweepAngle, mMaxAngle)) {
 
 
                 mSweepAngle = 20 * Math.abs(Math.cos(mTime));
-                mTime = mTime + Math.PI / 48 ;
+                mTime = mTime + Math.PI / 48;
             } else {
                 isCw = true;
             }
         }
 
-       postInvalidateDelayed(48);
+        postInvalidateDelayed(48);
         //0  -  20
 
     }
@@ -454,7 +491,7 @@ public class NewtonCradle extends View {
 // 后每次ondraw都没有reset,就导致了path越来越多,
 // 最后卡死.解决方法就reset
 
-    private boolean DoubleCompare(double d1,double d2){
+    private boolean DoubleCompare(double d1, double d2) {
         return Math.abs(d1 - d2) < 1.0 * 10E-6;
     }
 

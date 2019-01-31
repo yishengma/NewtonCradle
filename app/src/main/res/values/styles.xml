@@ -13,12 +13,15 @@
         <attr name="ball_color" format="color"/>
         <!--支架的颜色-->
         <attr name="cradle_color" format="color"/>
-        <!--球的数量，最少 3 个-->
+        <!--球的数量，最少 2 个-->
         <attr name="ball_count" format="integer"/>
         <!--底座的颜色-->
         <attr name="base_color" format="color"/>
 
         <attr name="line_color" format="color"/>
+
+        <attr name="ball_radius" format="integer"/>
+
     </declare-styleable>
 
 </resources>
