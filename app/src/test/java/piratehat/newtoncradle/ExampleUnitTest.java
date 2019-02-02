@@ -1,4 +1,4 @@
-package d.running.newtoncradle;
+package piratehat.newtoncradle;
 
 import org.junit.Test;
 

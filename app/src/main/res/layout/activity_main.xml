@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:nc="http://schemas.android.com/apk/res-auto"
-    tools:context="d.running.newtoncradle.MainActivity">
+    tools:context="piratehat.newtoncradle.MainActivity">
 
-    <d.running.newtoncradle.NewtonCradle
+    <piratehat.newtoncradle.NewtonCradle
         nc:start_with_cw="false"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

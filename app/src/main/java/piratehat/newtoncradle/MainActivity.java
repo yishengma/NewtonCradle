@@ -1,4 +1,4 @@
-package d.running.newtoncradle;
+package piratehat.newtoncradle;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

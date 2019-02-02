@@ -1,4 +1,4 @@
-package d.running.newtoncradle;
+package piratehat.newtoncradle;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
