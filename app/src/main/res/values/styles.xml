@@ -22,6 +22,9 @@
 
         <attr name="ball_radius" format="integer"/>
 
+
+        <attr name="start_with_cw" format="boolean" />
+
     </declare-styleable>
 
 </resources>

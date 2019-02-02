@@ -5,7 +5,7 @@ import android.content.Context;
 
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
+
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
@@ -16,10 +16,13 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
 
+
+
 import android.view.View;
 import android.view.ViewGroup;
 
 /**
+ *  牛顿摆
  * Created by PirateHat on 2019/1/29.
  */
 
@@ -29,7 +32,7 @@ public class NewtonCradle extends View {
     private static final int DEFAULT_WIDTH = 350;
 
     private static final int DEFAULT_RADIUS = 20;
-    private static int MAX_BALL_COUNT = 6; // 最大的球的数量
+    private static final int MAX_BALL_COUNT = 6; // 最大的球的数量
     private static final int MIN_BALL_COUNT = 2;
     private static final int DEFAULT_BALL_COUNT = 6;
     private static final int DEFAULT_BALL_COLOR = 0xff_ff_ff_ff;
@@ -85,6 +88,8 @@ public class NewtonCradle extends View {
     private int mCurrentBall;
 
 
+
+
     private static final String TAG = "NewtonCradle";
 
 
@@ -121,7 +126,7 @@ public class NewtonCradle extends View {
         mLineColor = typedArray.getColor(R.styleable.NewtonCradle_line_color, DEFAULT_LINE_COLOR);
         //球的数量
         mBallCount = typedArray.getColor(R.styleable.NewtonCradle_ball_count, DEFAULT_BALL_COUNT);
-        if (mBallCount < 2) {
+        if (mBallCount < MIN_BALL_COUNT || mBallCount > MAX_BALL_COUNT) {
             mBallCount = DEFAULT_BALL_COUNT;
         }
 
@@ -130,6 +135,9 @@ public class NewtonCradle extends View {
         if (mRadius < 1) {
             mRadius = DEFAULT_RADIUS;
         }
+
+
+        isCw = typedArray.getBoolean(R.styleable.NewtonCradle_start_with_cw, true);
         typedArray.recycle();
 
     }
@@ -192,12 +200,11 @@ public class NewtonCradle extends View {
     }
 
     private void initData() {
-        isCw = true;
 
-
-        mSweepAngle = 20;
-        mMaxAngle = mSweepAngle;
-        mCurrentBall = 0;
+            //单位是角度
+            mSweepAngle = 20;
+            mMaxAngle = mSweepAngle;
+            mCurrentBall = isCw ? mBallCount - 1 : 0;
 
         mTime = 0;
 
@@ -223,11 +230,11 @@ public class NewtonCradle extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int ws = MeasureSpec.getSize(widthMeasureSpec);
-        int wm = MeasureSpec.getMode(widthMeasureSpec);
+        //  int ws = MeasureSpec.getSize(widthMeasureSpec);
+        //  int wm = MeasureSpec.getMode(widthMeasureSpec);
 
         int hs = MeasureSpec.getSize(heightMeasureSpec);
-        int hm = MeasureSpec.getMode(heightMeasureSpec);
+        // int hm = MeasureSpec.getMode(heightMeasureSpec);
 
         //这里不用 模式进行比较是因为 当 父容器为 AT_MOST 当前 View 为 Match_parent 时
         //当前 View 的大小因为 父容器的大小，但是模式 为 AT_MOST
@@ -264,6 +271,7 @@ public class NewtonCradle extends View {
 
         drawLines(canvas);
 
+
         swingAngle();
     }
 
@@ -275,7 +283,7 @@ public class NewtonCradle extends View {
         canvas.translate(mWidth / 2, mHeight / 2);
         //单数个球
         int radius = 20;
-        int x = 0;
+        int x /*= 0*/;
         int y = 0;
 
         //偶数个球
@@ -442,7 +450,6 @@ public class NewtonCradle extends View {
     }
 
     private void swingAngle() {
-
         if (isCw) {
             //这个角度的增加需要按提高的高度进行增加，生成暂停的动画效果
             if (mCurrentBall == mBallCount - 1 && /*mSweepAngle != 0*/!DoubleCompare(mSweepAngle, 0)) {
@@ -473,8 +480,6 @@ public class NewtonCradle extends View {
             } else if (mCurrentBall != mBallCount - 1) {
                 mCurrentBall++;
             } else if (mCurrentBall == mBallCount - 1 && /*mSweepAngle != mMaxAngle*/!DoubleCompare(mSweepAngle, mMaxAngle)) {
-
-
                 mSweepAngle = 20 * Math.abs(Math.cos(mTime));
                 mTime = mTime + Math.PI / 48;
             } else {
@@ -491,6 +496,13 @@ public class NewtonCradle extends View {
 // 后每次ondraw都没有reset,就导致了path越来越多,
 // 最后卡死.解决方法就reset
 
+    /**
+     * Double 类型的大小比较 ，两个数之差小于 10E-6 就算等于
+     *
+     * @param d1 减数
+     * @param d2 被减数
+     * @return 差是否小于 10E-6
+     */
     private boolean DoubleCompare(double d1, double d2) {
         return Math.abs(d1 - d2) < 1.0 * 10E-6;
     }
